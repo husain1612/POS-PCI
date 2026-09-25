@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Design tokens — light mode (default) and dark mode (".dark" class strategy,
+  toggled by src/components/layout/ThemeToggle.tsx and initialized pre-paint by
+  the inline script in src/app/layout.tsx).
+
+  Values are HSL triples (no hsl() wrapper) so Tailwind can apply alpha via
+  hsl(var(--x) / <alpha-value>). Source hues follow the validated categorical /
+  status palette from the dataviz design system.
+*/
+:root {
+  --bg: 60 14% 97%;
+  --surface: 60 14% 99%;
+  --surface-raised: 0 0% 100%;
+  --border: 53 12% 87%;
+  --border-strong: 55 9% 74%;
+
+  --ink-primary: 0 0% 4%;
+  --ink-secondary: 45 3% 31%;
+  --ink-muted: 45 3% 52%;
+
+  --brand: 213 68% 50%;
+  --brand-hover: 213 72% 39%;
+  --brand-subtle: 216 77% 95%;
+  --brand-fg: 0 0% 100%;
+
+  --success: 120 86% 34%;
+  --success-subtle: 120 60% 94%;
+  --warning: 36 94% 43%;
+  --warning-subtle: 41 96% 92%;
+  --danger: 0 61% 52%;
+  --danger-subtle: 0 70% 95%;
+
+  --chart-1: 213 68% 50%;
+  --chart-2: 17 82% 56%;
+  --chart-3: 159 73% 40%;
+  --chart-4: 41 100% 46%;
+  --chart-5: 337 70% 70%;
+  --chart-6: 120 100% 26%;
+  --chart-7: 249 48% 44%;
+  --chart-8: 0 73% 59%;
+
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 0 0% 5%;
+  --surface: 60 2% 10%;
+  --surface-raised: 60 2% 13%;
+  --border: 60 2% 17%;
+  --border-strong: 60 3% 21%;
+
+  --ink-primary: 0 0% 100%;
+  --ink-secondary: 55 9% 74%;
+  --ink-muted: 45 3% 60%;
+
+  --brand: 213 77% 56%;
+  --brand-hover: 212 75% 62%;
+  --brand-subtle: 216 54% 16%;
+  --brand-fg: 0 0% 100%;
+
+  --success: 120 60% 45%;
+  --success-subtle: 120 40% 14%;
+  --warning: 41 96% 54%;
+  --warning-subtle: 40 60% 14%;
+  --danger: 0 72% 65%;
+  --danger-subtle: 0 45% 16%;
+
+  --chart-1: 213 77% 56%;
+  --chart-2: 17 70% 50%;
+  --chart-3: 159 73% 36%;
+  --chart-4: 40 100% 39%;
+  --chart-5: 338 61% 58%;
+  --chart-6: 120 100% 32%;
+  --chart-7: 247 69% 72%;
+  --chart-8: 0 72% 65%;
+
+  color-scheme: dark;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: hsl(var(--bg));
+  color: hsl(var(--ink-primary));
+}
+
+::selection {
+  background-color: hsl(var(--brand) / 0.25);
+}
+
+/* Thin, unobtrusive scrollbars to match the dense admin UI */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border-strong)) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border-strong));
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.skeleton {
+  background-image: linear-gradient(
+    90deg,
+    hsl(var(--border) / 0.5) 25%,
+    hsl(var(--border) / 0.9) 37%,
+    hsl(var(--border) / 0.5) 63%
+  );
+  background-size: 400% 100%;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
