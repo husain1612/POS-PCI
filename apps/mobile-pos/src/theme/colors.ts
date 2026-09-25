@@ -1,0 +1,89 @@
+export interface ColorTokens {
+  background: string;
+  backgroundAlt: string;
+  surface: string;
+  surfaceElevated: string;
+  surfaceSunken: string;
+  border: string;
+  borderStrong: string;
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  textInverse: string;
+  primary: string;
+  primaryPressed: string;
+  primaryMuted: string;
+  onPrimary: string;
+  success: string;
+  successMuted: string;
+  warning: string;
+  warningMuted: string;
+  error: string;
+  errorMuted: string;
+  info: string;
+  infoMuted: string;
+  overlay: string;
+  disabled: string;
+  disabledText: string;
+  shadow: string;
+}
+
+export const lightColors: ColorTokens = {
+  background: "#FFFFFF",
+  backgroundAlt: "#F7F7FB",
+  surface: "#F7F7FB",
+  surfaceElevated: "#FFFFFF",
+  surfaceSunken: "#F0F1F5",
+  border: "#E6E7EC",
+  borderStrong: "#D3D5DE",
+  textPrimary: "#14151A",
+  textSecondary: "#5C5F6A",
+  textTertiary: "#94969F",
+  textInverse: "#FFFFFF",
+  primary: "#5B5BF6",
+  primaryPressed: "#4A47E0",
+  primaryMuted: "#EDECFE",
+  onPrimary: "#FFFFFF",
+  success: "#0F9D58",
+  successMuted: "#E3F7EC",
+  warning: "#B7791F",
+  warningMuted: "#FCF1DA",
+  error: "#D92D20",
+  errorMuted: "#FDECEA",
+  info: "#2563EB",
+  infoMuted: "#E7EFFE",
+  overlay: "rgba(15,16,23,0.55)",
+  disabled: "#E6E7EC",
+  disabledText: "#B3B5C0",
+  shadow: "#14151A",
+};
+
+export const darkColors: ColorTokens = {
+  background: "#0E0F13",
+  backgroundAlt: "#15161C",
+  surface: "#191A21",
+  surfaceElevated: "#1F2028",
+  surfaceSunken: "#0B0C10",
+  border: "#2A2C36",
+  borderStrong: "#383B48",
+  textPrimary: "#F5F5F7",
+  textSecondary: "#A6A8B4",
+  textTertiary: "#6E7080",
+  textInverse: "#14151A",
+  primary: "#7A79FF",
+  primaryPressed: "#8F8EFF",
+  primaryMuted: "#25243F",
+  onPrimary: "#0E0F13",
+  success: "#34C77B",
+  successMuted: "#123423",
+  warning: "#E0A94A",
+  warningMuted: "#3A2C13",
+  error: "#F1685E",
+  errorMuted: "#3B1917",
+  info: "#5B93F5",
+  infoMuted: "#17233D",
+  overlay: "rgba(0,0,0,0.65)",
+  disabled: "#262832",
+  disabledText: "#54566356",
+  shadow: "#000000",
+};

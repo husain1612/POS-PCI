@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Mobile POS",
+    "slug": "mobile-pos",
+    "scheme": "mobilepos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pospci.mobilepos"
+    },
+    "android": {
+      "package": "com.pospci.mobilepos"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router"]
+  }
+}
