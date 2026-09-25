@@ -1,0 +1,472 @@
+// POS Ecosystem — Backend Data Model (Rp15jt / Professional scope)
+// Generator & datasource
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Organization & Outlet
+// ─────────────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  outlets     Outlet[]
+  users       User[]
+  roles       Role[]
+  categories  Category[]
+  products    Product[]
+  suppliers   Supplier[]
+  promotions  Promotion[]
+  vouchers    Voucher[]
+  notifications Notification[]
+}
+
+model Outlet {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  code           String   @unique
+  address        String?
+  managerId      String?
+  manager        User?    @relation("OutletManager", fields: [managerId], references: [id])
+  status         Status   @default(ACTIVE)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  users            User[]            @relation("UserOutlet")
+  inventories      Inventory[]
+  stockMovements   StockMovement[]
+  stockOpnames     StockOpname[]
+  transactions     Transaction[]
+  promotionOutlets PromotionOutlet[]
+  notifications    Notification[]
+}
+
+// ─────────────────────────────────────────────
+// User, Role & Permission
+// ─────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  email          String   @unique
+  passwordHash   String
+  roleId         String
+  role           Role     @relation(fields: [roleId], references: [id])
+  outletId       String?
+  outlet         Outlet?  @relation("UserOutlet", fields: [outletId], references: [id])
+  status         Status   @default(ACTIVE)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  managesOutlets Outlet[]        @relation("OutletManager")
+  transactions   Transaction[]
+  stockOpnamesCreated  StockOpname[] @relation("OpnameCreatedBy")
+  stockOpnamesApproved StockOpname[] @relation("OpnameApprovedBy")
+  refundsApproved      Refund[]      @relation("RefundApprovedBy")
+  auditLogs      AuditLog[]
+}
+
+model Role {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  isSystem       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@unique([organizationId, name])
+}
+
+model Permission {
+  id     String @id @default(cuid())
+  module String
+  action PermissionAction
+
+  roles RolePermission[]
+
+  @@unique([module, action])
+}
+
+model RolePermission {
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+enum PermissionAction {
+  VIEW
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  EXPORT
+}
+
+// ─────────────────────────────────────────────
+// Product Catalog
+// ─────────────────────────────────────────────
+
+model Category {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  parentId       String?
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children       Category[] @relation("CategoryTree")
+
+  products Product[]
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id])
+  name           String
+  sku            String   @unique
+  barcode        String?  @unique
+  basePrice      Decimal  @db.Decimal(14, 2)
+  taxable        Boolean  @default(true)
+  status         Status   @default(ACTIVE)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  variants          ProductVariant[]
+  modifiers         ProductModifier[]
+  inventories       Inventory[]
+  stockMovements    StockMovement[]
+  stockOpnameItems  StockOpnameItem[]
+  transactionItems  TransactionItem[]
+  promotionProducts PromotionProduct[]
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  sku       String  @unique
+  barcode   String? @unique
+  price     Decimal @db.Decimal(14, 2)
+
+  inventories      Inventory[]
+  stockMovements   StockMovement[]
+  stockOpnameItems StockOpnameItem[]
+  transactionItems TransactionItem[]
+}
+
+model ProductModifier {
+  id              String  @id @default(cuid())
+  productId       String
+  product         Product @relation(fields: [productId], references: [id])
+  name            String
+  priceAdjustment Decimal @db.Decimal(14, 2) @default(0)
+}
+
+// ─────────────────────────────────────────────
+// Inventory & Stock
+// ─────────────────────────────────────────────
+
+model Inventory {
+  id               String   @id @default(cuid())
+  outletId         String
+  outlet           Outlet   @relation(fields: [outletId], references: [id])
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id])
+  variantId        String?
+  variant          ProductVariant? @relation(fields: [variantId], references: [id])
+  currentStock     Int      @default(0)
+  reservedStock    Int      @default(0)
+  minimumStock     Int      @default(0)
+  unit             String   @default("pcs")
+  updatedAt        DateTime @updatedAt
+
+  @@unique([outletId, productId, variantId])
+}
+
+model StockMovement {
+  id         String            @id @default(cuid())
+  outletId   String
+  outlet     Outlet            @relation(fields: [outletId], references: [id])
+  productId  String
+  product    Product           @relation(fields: [productId], references: [id])
+  variantId  String?
+  variant    ProductVariant?   @relation(fields: [variantId], references: [id])
+  type       StockMovementType
+  quantity   Int
+  supplierId String?
+  supplier   Supplier?         @relation(fields: [supplierId], references: [id])
+  reference  String?
+  note       String?
+  createdAt  DateTime          @default(now())
+}
+
+enum StockMovementType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+  OPNAME
+}
+
+model StockOpname {
+  id           String            @id @default(cuid())
+  outletId     String
+  outlet       Outlet            @relation(fields: [outletId], references: [id])
+  status       StockOpnameStatus @default(DRAFT)
+  createdById  String
+  createdBy    User              @relation("OpnameCreatedBy", fields: [createdById], references: [id])
+  approvedById String?
+  approvedBy   User?             @relation("OpnameApprovedBy", fields: [approvedById], references: [id])
+  startedAt    DateTime          @default(now())
+  submittedAt  DateTime?
+  approvedAt   DateTime?
+
+  items StockOpnameItem[]
+}
+
+enum StockOpnameStatus {
+  DRAFT
+  COUNTING
+  SUBMITTED
+  APPROVED
+  ADJUSTED
+  REJECTED
+}
+
+model StockOpnameItem {
+  id            String          @id @default(cuid())
+  opnameId      String
+  opname        StockOpname     @relation(fields: [opnameId], references: [id])
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id])
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+  systemQty     Int
+  physicalQty   Int?
+  variance      Int?
+}
+
+model Supplier {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  contactName    String?
+  phone          String?
+  email          String?
+  address        String?
+  status         Status   @default(ACTIVE)
+
+  stockMovements StockMovement[]
+}
+
+// ─────────────────────────────────────────────
+// Transactions
+// ─────────────────────────────────────────────
+
+model Transaction {
+  id                String            @id @default(cuid())
+  transactionNumber String            @unique
+  outletId          String
+  outlet            Outlet            @relation(fields: [outletId], references: [id])
+  cashierId         String
+  cashier           User              @relation(fields: [cashierId], references: [id])
+  subtotal          Decimal           @db.Decimal(14, 2)
+  discountTotal     Decimal           @db.Decimal(14, 2) @default(0)
+  taxTotal          Decimal           @db.Decimal(14, 2) @default(0)
+  grandTotal        Decimal           @db.Decimal(14, 2)
+  status            TransactionStatus @default(COMPLETED)
+  voucherId         String?
+  voucher           Voucher?          @relation(fields: [voucherId], references: [id])
+  createdAt         DateTime          @default(now())
+
+  items    TransactionItem[]
+  payments Payment[]
+  refunds  Refund[]
+}
+
+enum TransactionStatus {
+  COMPLETED
+  VOID
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model TransactionItem {
+  id            String          @id @default(cuid())
+  transactionId String
+  transaction   Transaction     @relation(fields: [transactionId], references: [id])
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id])
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id])
+  quantity      Int
+  price         Decimal         @db.Decimal(14, 2)
+  discount      Decimal         @db.Decimal(14, 2) @default(0)
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  transactionId String
+  transaction   Transaction   @relation(fields: [transactionId], references: [id])
+  method        PaymentMethod
+  amount        Decimal       @db.Decimal(14, 2)
+  createdAt     DateTime      @default(now())
+}
+
+enum PaymentMethod {
+  CASH
+  QRIS
+  DEBIT
+  CREDIT_CARD
+  EWALLET
+}
+
+model Refund {
+  id            String       @id @default(cuid())
+  transactionId String
+  transaction   Transaction  @relation(fields: [transactionId], references: [id])
+  reason        String
+  amount        Decimal      @db.Decimal(14, 2)
+  status        RefundStatus @default(PENDING)
+  approvedById  String?
+  approvedBy    User?        @relation("RefundApprovedBy", fields: [approvedById], references: [id])
+  createdAt     DateTime     @default(now())
+  resolvedAt    DateTime?
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ─────────────────────────────────────────────
+// Promotion & Voucher
+// ─────────────────────────────────────────────
+
+model Promotion {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  name           String
+  type           PromotionType
+  value          Decimal       @db.Decimal(14, 2)
+  startDate      DateTime
+  endDate        DateTime
+  status         Status        @default(ACTIVE)
+
+  outlets  PromotionOutlet[]
+  products PromotionProduct[]
+  vouchers Voucher[]
+}
+
+enum PromotionType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  BUY_ONE_GET_ONE
+}
+
+model PromotionOutlet {
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  outletId    String
+  outlet      Outlet    @relation(fields: [outletId], references: [id])
+
+  @@id([promotionId, outletId])
+}
+
+model PromotionProduct {
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+
+  @@id([promotionId, productId])
+}
+
+model Voucher {
+  id             String    @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  code           String    @unique
+  promotionId    String?
+  promotion      Promotion? @relation(fields: [promotionId], references: [id])
+  discountValue  Decimal   @db.Decimal(14, 2)
+  usageLimit     Int?
+  usedCount      Int       @default(0)
+  expiryDate     DateTime?
+  status         Status    @default(ACTIVE)
+
+  transactions Transaction[]
+}
+
+// ─────────────────────────────────────────────
+// Audit Log & Notification
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  module     String
+  entityId   String?
+  dataBefore Json?
+  dataAfter  Json?
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id             String             @id @default(cuid())
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  outletId       String?
+  outlet         Outlet?            @relation(fields: [outletId], references: [id])
+  type           NotificationType
+  title          String
+  message        String
+  isRead         Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+}
+
+enum NotificationType {
+  LOW_STOCK
+  OUT_OF_STOCK
+  REFUND_REQUEST
+  STOCK_OPNAME_APPROVAL
+  SYNC_FAILED
+  SYSTEM_ALERT
+}
+
+// ─────────────────────────────────────────────
+// Shared enums
+// ─────────────────────────────────────────────
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}

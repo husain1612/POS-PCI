@@ -1,0 +1,44 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { SupplierService } from './suppliers.service';
+import { Prisma } from '@prisma/client';
+
+@UseGuards(JwtAuthGuard)
+@Controller('suppliers')
+export class SupplierController {
+  constructor(private readonly service: SupplierService) {}
+
+  @Get()
+  findAll() {
+    return this.service.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
+  }
+
+  @Post()
+  create(@Body() data: Prisma.SupplierUncheckedCreateInput) {
+    return this.service.create(data);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() data: Prisma.SupplierUncheckedUpdateInput) {
+    return this.service.update(id, data);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.service.remove(id);
+  }
+}
