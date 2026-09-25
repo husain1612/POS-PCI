@@ -239,30 +239,6 @@ export const adminUsers: AdminUser[] = [
   { id: "usr-10", name: "Rizky Ramadhan", email: "rizky.ramadhan@kopikenangan.id", role: "Cashier", outlet: "Kemang", status: "suspended", lastActive: "2026-09-10T13:44:00", avatarColor: "chart-2" },
 ];
 
-export const roles: RoleDefinition[] = [
-  {
-    id: "role-admin",
-    name: "Admin",
-    description: "Full access to every module across all outlets and organizations.",
-    userCount: 4,
-    permissions: buildPermissions("full"),
-  },
-  {
-    id: "role-manager",
-    name: "Outlet Manager",
-    description: "Manages a single outlet: staff, inventory, promotions and reporting.",
-    userCount: 8,
-    permissions: buildPermissions("manager"),
-  },
-  {
-    id: "role-cashier",
-    name: "Cashier",
-    description: "Front-of-house access limited to transactions and product lookup.",
-    userCount: 34,
-    permissions: buildPermissions("cashier"),
-  },
-];
-
 export const permissionModules = [
   "Dashboard",
   "Outlets",
@@ -296,6 +272,30 @@ function buildPermissions(level: "full" | "manager" | "cashier") {
   }
   return result;
 }
+
+export const roles: RoleDefinition[] = [
+  {
+    id: "role-admin",
+    name: "Admin",
+    description: "Full access to every module across all outlets and organizations.",
+    userCount: 4,
+    permissions: buildPermissions("full"),
+  },
+  {
+    id: "role-manager",
+    name: "Outlet Manager",
+    description: "Manages a single outlet: staff, inventory, promotions and reporting.",
+    userCount: 8,
+    permissions: buildPermissions("manager"),
+  },
+  {
+    id: "role-cashier",
+    name: "Cashier",
+    description: "Front-of-house access limited to transactions and product lookup.",
+    userCount: 34,
+    permissions: buildPermissions("cashier"),
+  },
+];
 
 export const categories: Category[] = [
   { id: "cat-01", name: "Kopi & Minuman", productCount: 142, color: "chart-1" },

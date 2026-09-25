@@ -10,7 +10,7 @@ export default function NotFound() {
       </span>
       <div>
         <h1 className="text-lg font-semibold text-ink-primary">Page not found</h1>
-        <p className="mt-1 text-sm text-ink-muted">The page you're looking for doesn't exist or may have been moved.</p>
+        <p className="mt-1 text-sm text-ink-muted">The page you&apos;re looking for doesn&apos;t exist or may have been moved.</p>
       </div>
       <Button asChild>
         <Link href="/dashboard">Back to Dashboard</Link>
